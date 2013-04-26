@@ -1,0 +1,138 @@
+%
+\documentclass[12pt,letterpaper]{article}
+\usepackage{bbm}
+\usepackage{url}
+\usepackage{float}
+\usepackage{fancyhdr}
+%\usepackage{fancybox}
+%\usepackage{amstext}
+\usepackage{amsmath}
+%\usepackage{rotating}
+\usepackage{multicol}
+\usepackage{pictexwd}
+\usepackage{enumitem}
+%\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{booktabs,multirow}
+\usepackage{siunitx}
+\usepackage{subfigure}
+\setlength{\parindent}{0in}
+\setlength{\textwidth}{7in}
+\setlength{\evensidemargin}{-0.25in}
+\setlength{\oddsidemargin}{-0.25in}
+\setlength{\parskip}{.5\baselineskip}
+\setlength{\topmargin}{-0.65in}
+\setlength{\textheight}{9in}
+%               Problem and Part
+\newcounter{problemnumber}
+\newcounter{partnumber}
+\newcommand{\Problem}{\stepcounter{problemnumber}\setcounter{partnumber}{0}\item[\makebox{\hfil\textbf{\ \theproblemnumber.}\hfil}]}
+\newcommand{\Part}{\stepcounter{partnumber}\item[(\alph{partnumber})]}
+\newcommand{\SubPart}{\stepcounter{problemnumber}\setcounter{partnumber}{0}}
+
+\pagestyle{empty}
+
+\rhead{\large\textsc{Angeline Baniqued \& Michael Wee}}
+\lhead{\LARGE\textbf{CS 181 Assignment 5}}
+\cfoot{}
+\renewcommand{\headrulewidth}{0.3pt}
+\setlength{\headsep}{40pt}
+\usepackage{amssymb}
+
+\begin{document}
+
+\thispagestyle{fancy}\small
+  \section*{Problem 1}
+  \begin{enumerate}[label={(\alph*) }]
+        \item Given a probability distribution, $P(s'|s,a)$, and utility function, $U(s',s)$, the following equations will determine the optimal action, $\pi^*(s)$, given the current score, $s$. \medskip \\
+        $V(s) =  0             $\\
+        Repeat until convergence $V(s) = V'(s) < \epsilon$:\ \\
+        $\phantom{points}V'(s) = V(s) $ \\
+        $\phantom{points}$For each action $a \in A$ \\
+        $\phantom{pointspoints}R(s,a)= \Sigma_{s'} P(s'|s,a)U(s',s)$\\
+        $\phantom{pointspoints}Q(s,a)=R(s,a) + \Sigma_{s'} P(s'|s,a)V'(s')$\\
+        $\phantom{points}\pi^*(s) = argmax_{a \in A}Q(s,a)$\\
+        $\phantom{points}V(s) = Q(s,\pi^*(s))$\\ 
+        
+        
+        \item This proposal works in that the dart player will strive to get 0 points since the utility of getting points $\leq $ his current score is non-zero.    It makes good decisions when the current score is closer to 0 and when it's possible to finish off the game in one throw because the policy will be greedy, considering only the reward in the next step. For a current score that will require at least a few more throws, there will be no long-term planning and it will perform poorly because it can't plan ahead and it might get you to a state you don't want to be in. Lastly, for a current score that is still far from 0, there is an incentive to sacrifice short-term gain for long-run benefit.
+However, at the very beginning, it's possible that you perform better because you want to reduce your score as quickly as possible.   \end{enumerate}
+\section*{Problem 2}
+\begin{enumerate}[label={(\alph*) }]
+        \item The states are the possible scores that one can get. For any darts game, the list of states will be $range(0, starting\_score+1)$. The actions of the MDP\ model are the possible targets on the dart board specified by a wedge number and a ring number. See get\_states() function in darts.py for the code. 
+        \item For each state and action, we can define the reward to be as simple as just $1/current\_score$. This means that a player gets higher rewards when his or her current score is closer to 0 and gets lower rewards when his or her current score is far from 0. When the current score is 0, we set the reward to be a large number such as 100,000.
+        \item See the function T() in mdp.py
+        \item It makes more sense to implement the infinite horizon value iteration algorithm than it is to implement the finite horizon value iteration algorithm because we don't have an upper bound on how long it will take for the player to finish the game. In the finite horizon, the algorithm requires us to specify the upper bound, $T$, which makes it a problem for the darts game. It makes more sense to use the infinite horizon because we know that the player will win at some point, we just don't know how long it will take. 
+        \item The intuition behind the optimal policy resulting from value iteration using the small game is as follows:
+                \begin{itemize}
+                        \item At the start of the game, when the starting number of points or starting state is 9, the optimal policy will always aim to get Wedge 3, Ring 3 because that yields a score of 9 points which would end the game. 
+                        \item If the player misses that Wedge 3, Ring 3 target, he updates his current score and now  will aim for the target that will get him to 0 again. For example, if he gets Wedge 4, Ring 4, in the very first throw, his current score becomes 5 and now he or she aims at Wedge 1, Ring 1, which would bring his score down to 0. 
+                        \item Whenever the player misses again, suppose that the state is now sufficiently close to 0 such as 1 or 2, the optimal policy will again aim to get the score down to 0. However, because the player only has one throw left and the actions that give exactly 1 or 2 are spread out (unlike actions that give 5 which are all in the inner ring), the game usually takes longer to finish, sometimes going up to around 10 turns.  
+                        \item To fully write out the optimal policies, we get the following:\
+                                \begin{itemize}
+                                        \item For current state $s = 9$, aim at W3R3 (only action that yields a 9).
+                                        \item For current state $s=8$, aim at W4R5 (only action that yields an 8).
+                                        \item For current state $s=7$, aim at W2R4 (there's no action that yields a 7, but aiming at W2R4, brings the score enough so that you end up at state $s=5$, which we know will make it easy to get on the next turn since all the inner ring wedges give you a 5). 
+                                        \item For current state $s=6$,
+aim at W3R5 or W2R3 (only actions that yield a 6).
+                                        \item For current state $s=5$, aim anywhere that lands on the inner ring. 
+                                        \item For current state $s = 4$, aim at those wedges and rings that yield a 4.                                         \item For current state $s=3$, aim at those wedges and rings that yield a 3.                                        \item For current state $s=2$, aim at those wedges and rings that yield a 2. 
+                                        \item For current state $s=1$,
+aim at those wedges and rings that yield a 1.       
+                                        \item For current state $s=0$, game is over!    
+                          \end{itemize} 
+ 
+                \end{itemize}
+        \end{enumerate}
+
+\section*{Problem 3}
+\begin{enumerate}[label={(\alph*) }]
+        \item Prove that if policy iteration terminates with the policy $\pi^*$, $\pi^*$ is an optimal stationary policy. \\
+
+We have that a policy $\pi(s)$ satisfies a corresponding value function \\ $\displaystyle{V(s) = R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V^{\pi}(s')}}$ \\
+
+Policy iteration solves the fixed point equation by beginning with any policy $\pi_0$, applying the right hand of the below equation to generate new policies until it converges: \\
+
+Eq (1) $\displaystyle{\pi '(s) = argmax_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V'(s')}}$ \\
+
+Since for each step of policy iteration, we take the argmax of the term on the right hand side, and at the last step, we will get policy $\pi^*$ as the argmax of the above expression. However, we note that the Bellman equation for the value of an optimal policy is given by \\
+
+Eq (2) $\displaystyle{V^{\pi^*}(s) = max_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V^{\pi^*}(s')}}$ \\
+
+Noting that the right hand sides of Equations 1 and 2 above are almost the same other than the max and argmax, we note that the terminating policy generated from Equation 1, since it is the argmax of a set of actions, exactly maximizes the corresponding value for that policy. \\
+
+It thus satisfies Bellman equation, Equation 2, and maximizes the Value equation so terminating policy $\pi^*$ must be optimal. \\
+
+\item
+
+We have for policy $\pi^{(1)}$, it has a corresponding value equation \\
+
+$\displaystyle{V_1(s) = R(s, \pi_1(a)) +  \gamma \sum_{s'}{P(s' | s, \pi(s))V_1^{\pi}(s')}}$ 
+
+and for policy $\pi^{(2)}$ we have \\
+
+(1) $\displaystyle{\pi^{(2)} = argmax_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V_2(s')}}$
+
+ with corresponding value equation $\displaystyle{V_2(s) = R(s, \pi^{(2)}(a)) +  \gamma \sum_{s'}{P(s' | s, \pi(s))V_2^{\pi}(s')}}$ \\
+
+When we step from $V_1$ to $V_2$, we are changing actions and also changing values. To see our result we break this step into two parts, keeping one aspect constant per part. \\
+
+We step from $V_{1a}$ to $V_{1b}$ by keeping the value in the right hand side of the equation constant: \\
+$ V_{1,1}(s) = R(s, \pi_1(s)) +  \gamma \sum_{s'}{P(s' | s, \pi_1(s))V_1^{\pi}(s')}$ \\
+$ V_{1,2}(s) = R(s, \pi_2(s)) +  \gamma \sum_{s'}{P(s' | s, \pi_2(s))V_1^{\pi}(s')}$ \\
+
+and via the (policy iteration) update rule (1) we have that the update rule sets it to the argmax term, so we have that the value increases from $V_{0a}$ to $V_{0b}$. We only need to update the action we take once in this step since it is argmax of the equation.
+
+The next step is updating the value to complete the policy iteration step. \\
+
+The next part of the iteration is updating $V_{1b}$ to $V_{1c}$, keeping actions constant: \\
+
+$V_{1,3}(s) = R(s, \pi_2(s)) +  \gamma \sum_{s'}{P(s' | s, \pi_2(s))V_{1,2}^{\pi}(s')}$ \\
+
+We observe $V_{1,3} - V_{1,2} = \gamma \sum_{s'}{P(s' | s, \pi_2(s))(V_{1,3}^{\pi}(s) - V_{1,2}(s'))}$, \\
+
+This equation is satisfied inductively for any $V_{1,n}, V_{1,n+1}$ since the expression on the right hand side decreases by a factor of $\gamma$ for each iteration because $0 \leq \gamma < 1$. This because a geometric series that will converge to $V_2(s)$. Because they all converge in a monotonically increasing series, it thus follows that $V_2(s) \geq V_1(s)$.
+
+
+
+\end{document}
