@@ -1,6 +1,7 @@
 import random
 import throw
 import darts
+import math
 
 EPSILON_VI = .001
 
@@ -24,20 +25,31 @@ def get_target(score):
 # You may want to pass arguments from the modelbased function. 
 
 # This one is random purely with some probability - equivalent to epsilon-greedy, but epsilon doesn't decrease here
-def ex_strategy_one():
+def ex_strategy_one(randAction, maxAction):
   randomNum = throw.ranf()
   if randomNum < 0.2:
-    return 0
-  return 1
+    return randAction
+  else: 
+    return maxAction
 
 # Define your first exploration/exploitation strategy here. Return 0 to exploit and 1 to explore. 
 # You may want to pass arguments from the modelbased function.
 
 # odd / even?
 # or based on score? - 
-def ex_strategy_two():
-
-  return 1
+def ex_strategy_two(numgames, gameNo, inQ, numActions, s):
+  tau = float(numgames - gameNo)
+  probabilities = []
+  for a in range(numActions):
+    Qvalue = inQ[s][a]
+    probabilities.append(math.exp(Qvalue/tau))
+  choice = random.randrange(0, sum(probabilities))
+  probSoFar = 0.0
+  for i in range(probabilities):
+    if probSoFar <= choice <= probSoFar + probabilities[i]:
+      return i
+    else:
+      probSoFar += probabilities[i]
 
 # Implement a model-based reinforcement learning algorithm. 
 # Given num_games (the number of games to play), store the
@@ -55,7 +67,9 @@ def modelbased(gamma, epoch_size, num_games):
     T_matrix = {}
     num_iterations = 0
     
-    
+    Q = {}
+    for s in states:
+      Q[s] = [0] * len(actions)
     # Initialize all arrays to 0 except the policy, which should be assigned a random action for each state.
     for s in states:
         pi_star[s] = random.randint(0, len(actions)-1)
@@ -87,15 +101,21 @@ def modelbased(gamma, epoch_size, num_games):
             # strategies. Comment out the strategy that you wish not to use.
 			
     	    #to_explore = ex_strategy_one()
-    	    to_explore = ex_strategy_two()
-    		
+    	    #to_explore = ex_strategy_two()
+          randAction = random.randint(0, len(actions))
+          maxAction = Q[score].index(max(Q[s]))
+
+          #a = ex_strategy_one(Q, randAction, maxAction)
+          a = ex_strategy_two(num_games, num_iterations, Q, len(actions), s)
+
+    		"""
             if to_explore:
             	# explore
             	a = random.randint(0, len(actions)-1)
             	action = actions[a]
             else:
             	# exploit
-            	a = pi_star[s]
+            	a = pi_star[s]"""
             	action = actions[a]
     
             
@@ -129,7 +149,7 @@ def modelbased(gamma, epoch_size, num_games):
 
                 # Update strategy (stored in pi) based on newly updated reward function and transition
                 # probabilities 
-                T_matrix, pi_star = modelbased_value_iteration(gamma, T_matrix, pi_star)
+                T_matrix, pi_star, Q = modelbased_value_iteration(gamma, T_matrix, pi_star)
     
     print "Average turns = ", float(num_iterations)/float(num_games)
 
@@ -180,6 +200,6 @@ def modelbased_value_iteration(gamma, T_matrix, pi_star):
 
       V[0][s] = V[1][s]
 
-  return T_matrix, pi_star
+  return T_matrix, pi_star, Q
 
   

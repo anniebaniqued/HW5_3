@@ -123,7 +123,7 @@ def main():
 # using the simple dart thrower that matches     #
 # the thrower specified in question 2.           #
 #*************************************************
-
+"""
 # Default is to solve MDP and play 1 game
     throw.use_simple_thrower()
     #test(10, "mdp")    
@@ -143,7 +143,7 @@ def main():
     plt.ylabel('average turns per game')
     plt.show()  
     savefig('2_e.png')
-
+"""
 #*************************************************#
 # Uncomment the lines below to run the modelbased #
 # code using the complex dart thrower.            #
@@ -155,9 +155,9 @@ def main():
 # multiple calls to main().
 # Then, initialize the throwing model and run
 # the modelbased algorithm.
-    #random.seed()
-    #throw.init_thrower()
-    #modelbased.modelbased(GAMMA, EPOCH_SIZE, num_games)
+    random.seed()
+    throw.init_thrower()
+    modelbased.modelbased(GAMMA, EPOCH_SIZE, num_games)
 
 #*************************************************#
 # Uncomment the lines below to run the modelfree  #

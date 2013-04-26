@@ -1,6 +1,7 @@
 from random import *
 import throw
 import darts
+import math
  
 # The default player aims for the maximum score, unless the
 # current score is less than the number of wedges, in which
@@ -38,7 +39,7 @@ def ex_strategy_two(numgames, gameNo, inQ, numActions, s):
   probabilities = []
   for a in range(numActions):
     Qvalue = inQ[s][a]
-    probabilities.append(Qvalue/tau)
+    probabilities.append(math.exp(Qvalue/tau))
   choice = random.randrange(0, sum(probabilities))
   probSoFar = 0.0
   for i in range(probabilities):
@@ -77,3 +78,5 @@ def Q_learning(gamma, numRounds, alpha):
       Q[s][a] = Q[s][a] + alpha * (darts.R(s, actions[a]) + (gamma * maxQ) - Q[s][a])
       s = s_prime
       currentRound += 1
+
+
