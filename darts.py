@@ -129,10 +129,10 @@ def main():
     #test(10, "mdp")    
 
     plt.clf()
-    xs = np.linspace(0,0.9,5)
+    xs = np.linspace(0,0.9,10)
     ys = []
     for i in xs:
-        ys.append(test(50,"mdp")[1])
+        ys.append(test(100,"mdp")[1])
     print xs
     print ys
     
