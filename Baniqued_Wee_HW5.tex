@@ -44,15 +44,9 @@
 \thispagestyle{fancy}\small
   \section*{Problem 1}
   \begin{enumerate}[label={(\alph*) }]
-        \item Given a probability distribution, $P(s'|s,a)$, and utility function, $U(s',s)$, the following equations will determine the optimal action, $\pi^*(s)$, given the current score, $s$. \medskip \\
-        $V(s) =  0             $\\
-        Repeat until convergence $V(s) = V'(s) < \epsilon$:\ \\
-        $\phantom{points}V'(s) = V(s) $ \\
-        $\phantom{points}$For each action $a \in A$ \\
-        $\phantom{pointspoints}R(s,a)= \Sigma_{s'} P(s'|s,a)U(s',s)$\\
-        $\phantom{pointspoints}Q(s,a)=R(s,a) + \Sigma_{s'} P(s'|s,a)V'(s')$\\
-        $\phantom{points}\pi^*(s) = argmax_{a \in A}Q(s,a)$\\
-        $\phantom{points}V(s) = Q(s,\pi^*(s))$\\ 
+        \item Given a probability distribution, $P(s'|s,a)$, and utility function, $U(s',s)$, the following equation will determine the optimal action, $\pi^*(s)$, given the current score, $s$. \medskip
+        \[ \pi^*(s) = argmax_{a \in A}\Sigma_{s'} P(s'|s,a)U(s',s) \]
+
         
         
         \item This proposal works in that the dart player will strive to get 0 points since the utility of getting points $\leq $ his current score is non-zero.    It makes good decisions when the current score is closer to 0 and when it's possible to finish off the game in one throw because the policy will be greedy, considering only the reward in the next step. For a current score that will require at least a few more throws, there will be no long-term planning and it will perform poorly because it can't plan ahead and it might get you to a state you don't want to be in. Lastly, for a current score that is still far from 0, there is an incentive to sacrifice short-term gain for long-run benefit.
@@ -61,8 +55,8 @@ However, at the very beginning, it's possible that you perform better because yo
 \begin{enumerate}[label={(\alph*) }]
         \item The states are the possible scores that one can get. For any darts game, the list of states will be $range(0, starting\_score+1)$. The actions of the MDP\ model are the possible targets on the dart board specified by a wedge number and a ring number. See get\_states() function in darts.py for the code. 
         \item For each state and action, we can define the reward to be as simple as just $1/current\_score$. This means that a player gets higher rewards when his or her current score is closer to 0 and gets lower rewards when his or her current score is far from 0. When the current score is 0, we set the reward to be a large number such as 100,000.
-        \item See the function T() in mdp.py
-        \item It makes more sense to implement the infinite horizon value iteration algorithm than it is to implement the finite horizon value iteration algorithm because we don't have an upper bound on how long it will take for the player to finish the game. In the finite horizon, the algorithm requires us to specify the upper bound, $T$, which makes it a problem for the darts game. It makes more sense to use the infinite horizon because we know that the player will win at some point, we just don't know how long it will take. 
+        \item See the function T() in mdp.py.
+        \item It makes more sense to implement the infinite horizon value iteration algorithm than it is to implement the finite horizon value iteration algorithm because we don't have an upper bound on how long it will take for the player to finish the game. In the finite horizon, the algorithm requires us to specify the upper bound, $T$, which makes that approach a problem for the darts game. It makes more sense to use the infinite horizon because we know that the player will win at some point, we just don't know how long it will take. 
         \item The intuition behind the optimal policy resulting from value iteration using the small game is as follows:
                 \begin{itemize}
                         \item At the start of the game, when the starting number of points or starting state is 9, the optimal policy will always aim to get Wedge 3, Ring 3 because that yields a score of 9 points which would end the game. 
@@ -83,6 +77,8 @@ aim at those wedges and rings that yield a 1.
                           \end{itemize} 
  
                 \end{itemize}
+        \item As you change the discount factor, the general trend is that the average number of turns per game increases. This is because if you have a lower discount factor, this means that it is better to receive the reward now because the reward received at time $t$ will be discounted by $\gamma^t$ which will have a really small weight if $\gamma$ is small. What's common across optimal policies is that at the very beginning when state $s=9$, the optimal policies always choose W3R3. In addition, at the very end, when the states or the scores are really close to 0, since there aren't that many future rounds left, the optimal policies for different discount factors will also be the same.     \\
+                \includegraphics[width=4in]{4e.png}
         \end{enumerate}
 
 \section*{Problem 3}
@@ -95,7 +91,7 @@ Policy iteration solves the fixed point equation by beginning with any policy $\
 
 Eq (1) $\displaystyle{\pi '(s) = argmax_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V'(s')}}$ \\
 
-Since for each step of policy iteration, we take the argmax of the term on the right hand side, and at the last step, we will get policy $\pi^*$ as the argmax of the above expression. However, we note that the Bellman equation for the value of an optimal policy is given by \\
+Since for each step of policy iteration, we take the argmax of the term on the right hand side, at the last step, we will get policy $\pi^*$ as the argmax of the above expression. However, we note that the Bellman equation for the value of an optimal policy is given by \\
 
 Eq (2) $\displaystyle{V^{\pi^*}(s) = max_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V^{\pi^*}(s')}}$ \\
 
@@ -105,7 +101,7 @@ It thus satisfies Bellman equation, Equation 2, and maximizes the Value equation
 
 \item
 
-We have for policy $\pi^{(1)}$, it has a corresponding value equation \\
+We have for policy $\pi^{(1)}$, a corresponding value equation \\
 
 $\displaystyle{V_1(s) = R(s, \pi_1(a)) +  \gamma \sum_{s'}{P(s' | s, \pi(s))V_1^{\pi}(s')}}$ 
 
@@ -131,8 +127,31 @@ $V_{1,3}(s) = R(s, \pi_2(s)) +  \gamma \sum_{s'}{P(s' | s, \pi_2(s))V_{1,2}^{\pi
 
 We observe $V_{1,3} - V_{1,2} = \gamma \sum_{s'}{P(s' | s, \pi_2(s))(V_{1,3}^{\pi}(s) - V_{1,2}(s'))}$, \\
 
-This equation is satisfied inductively for any $V_{1,n}, V_{1,n+1}$ since the expression on the right hand side decreases by a factor of $\gamma$ for each iteration because $0 \leq \gamma < 1$. This because a geometric series that will converge to $V_2(s)$. Because they all converge in a monotonically increasing series, it thus follows that $V_2(s) \geq V_1(s)$.
+This equation is satisfied inductively for any $V_{1,n}, V_{1,n+1}$ since the expression on the right hand side decreases by a factor of $\gamma$ for each iteration because $0 \leq \gamma < 1$. This is a geometric series that will converge to $V_2(s)$. Because they all converge in a monotonically increasing series, it thus follows that $V_2(s) \geq V_1(s)$. \\
+\item From (a), we have that if policy iteration terminates with policy $\pi^*$, the policy is optimal. This is true whether a policy terminates after a couple rounds, or doesn't iterate at all, meaning we started with an optimal policy because from (b) we have that every round of policy iteration yields a policy that corresponds to a greater value function. From (b) we have that the policies produced by policy iteration get better and better in the sense that the value function increases monotonically each iteration. \\
 
+We know that policy iteration must terminate because it solves the equation \\ $\displaystyle{\pi '(s) = argmax_{a \in A} R(s, \pi(s)) + \gamma \sum_{s'}{P(s' | s, \pi(s))V'(s')}}$ \\
+which defines a fixed point equation on the space of stationary policies. We have that the policy iteration algorithm represents a contraction operator because for any two value functions $V_1$ and $V_2$, policy iteration brings the policies corresponding to these value functions closer together. From the Banach Fixed Point Theorem, or the Contraction Mapping Theorem the operator must have a unique fixed point which it converges to. This unique fixed point solves the equation and when policy iteration reaches it, it will terminates. \\
 
+Thus policy iteration always terminates with an optimal stationary policy.
+\end{enumerate}
+\section*{Problem 4}
+\begin{enumerate}[label={(\alph*) }]
+        \item Refer to python darts.py for the code. \medskip \\
+        For the two strategies, we implemented the $\epsilon$-greedy  and the Boltzmann methods. For the $\epsilon$-greedy strategy, depending on the value of $\epsilon$, the method usually finds the optimal policies earlier but doesn't select it more often than not. The drawback of this strategy is that when it chooses to explore, it chooses equally among all actions. It is as likely to choose the worst action as it is to choose the second best action. This is bad in the darts game because bad actions are very bad (give you 0 utility when you score 60 points and your current score is significantly close to 0), making the e-greedy strategy unsatisfactory. \medskip \\
+The alternative, the Boltzmann strategy, varies the action probabilities as a graded function of the estimated value function. As our current score gets closer and closer to 0, the strategy just becomes the constant greedy strategy and stops exploring.  \\
+\[ \includegraphics[width=3in]{4a_final.png} \]\\
+        With respect to epoch size, both approaches seem to display a positive trend.\ For both methods, the smaller the epoch size, the fewer number of turns it takes to finish the game because  more frequent re-planning will lead to better policies more quickly. Comparing the two, what we notice is that the e-greedy approach starts off lower than the Boltzmann approach because it finds the optimal policies much earlier most likely because the Boltzmann starts off exploring more than the e-greedy approach. When the epoch size is larger, the e-greedy and the Boltzmann strategies  seem to perform about the same in that the Boltzmann approach's probability of explorations tends to zero whereas the epsilon we set in e-greedy is very small, explaining why the 2 lines intersect at high epochs.         
+
+   \item We used decreasing epsilon greedy and Boltzmann strategies and found that the Boltzmann strategy outperformed the epsilon-greedy algorithm on the medium-sized game. In particular, the epsilon-greedy algorithm takes a large number of rounds with emphasis on exploration before it starts performing as well as the Boltzmann strategy. This makes sense as it takes several iterations to fill out the Q matrix with many rounds of exploration before exploitation starts to occur. After a threshold number of emphasized exploration rounds (we used 0.8 times the number of games played, and for this "burn-in phase" we explored more often, with probability 0.9), we start exploiting the Q matrix values we have found. With more exploration rounds at the beginning in a "burn-in" type phase, before kicking in epsilon greedy, we achieved 40.09 throws to complete a round. If we do not include this burn-in phase, the algorithm performs much more poorly, requiring about 100 throws to complete. This is because if we rarely explore at the beginning, the Q matrix is too sparse to actually exploit well from. \\
+   
+   In contrast, the Boltzmann strategy combines exploration and exploitation by returning an action and it does consistently well across different board sizes. On the medium size board, Boltzmann requires an average of 28.57 throws to win the game, and combined with the fact that Boltzmann does not require a burn-in phase, makes it the superior strategy. \\
+   
+   \item Model-based performs slightly better than model-free on the medium-sized board with both exploration-exploitation strategies by 5-10 throws, depending on the strategy and epoch size. This makes intuitive sense as this game has fairly simple rules and representations that the model-based learning strategy can learn well. Once the agent has a good idea of the rewards and transitions learned into the model, which it can do well because of the relative simplicity of the real model, it will be able to make better decisions and policies as compared to the model-free approach, which tries to estimate via expected value, the Q values. \\
+   
+   Though model-free has a faster running time because it doesn't have to learn a $O(N^2M) transition model, it does not need to perform planning while learning, but because the domain is not very complex, it is actually an advantage to do model-based learning. So because the domain is not complex, building a model in model-based does better than in model-free learning.
+   
+   
+\end{enumerate}
 
 \end{document}

@@ -25,31 +25,29 @@ def get_target(score):
 # Exploration/exploitation strategy one.
 # This one is random purely with some probability
 # decreasing epsilon greedy by passing in numiterations
-def ex_strategy_one(numgames, currgame, randAction, maxAction):
-  randomNum = random.random()
-  change = 0.8 * numgames
-  if currgame < change: # fill out the Q table by exploring often
-    epsilon = 1
-    if random.uniform(0,1) < epsilon:
-      return randAction
-    else: 
-      return maxAction
-  else:
-    epsilon = 0.5 * change / float(currgame)
-    if random.uniform(0,1) < epsilon:
-      return randAction
-    else: 
-      return maxAction
+"""def ex_strategy_one(randAction, maxAction):
+  randomNum = throw.ranf()
+  if randomNum < 0.1:
+    return randAction
+  else: 
+    return maxAction"""
 
+def ex_strategy_one():
+  randomNum = throw.ranf()
+  if randomNum < 0.05:
+    return True
+  return False
 
 # Exploration/exploitation strategy two.
 # BOLTZMANN
-def ex_strategy_two(numgames, gameNo, inQ, numActions, s):
-  tau = float(numgames - gameNo)
+def ex_strategy_two(iterations, inQ, numActions, s):
+  tau = 100.0*(1.0/5.0)**(iterations)
   probabilities = []
   for a in range(numActions):
     Qvalue = inQ[s][a]
-    probabilities.append(math.exp(Qvalue/(tau+1)))
+    print "Qvalue: " + str(Qvalue)
+    print "tau: " + str(tau)
+    probabilities.append(math.exp(Qvalue/tau))
   choice = random.uniform(0, sum(probabilities))
   probSoFar = 0.0
   for i in range(len(probabilities)):
@@ -74,13 +72,29 @@ def Q_learning(gamma, numRounds, alpha):
       randAction = random.randint(0, len(actions) - 1)
       maxAction = Q[s].index(max(Q[s]))
 
-      a = ex_strategy_one(numRounds, i, randAction, maxAction)
-      #a = ex_strategy_two(numRounds, i, Q, len(actions), s)
+      #E-greedy
+      """
+      to_explore = ex_strategy_one()
+      if to_explore:
+        # explore
+        a = random.randint(0, len(actions)-1)
+        action = actions[a]
+      else:
+        # exploit
+        a = pi_star[s]
+        action = actions[a] 
+        """
+
+
+      #a = ex_strategy_one(randAction, maxAction)
+      a = ex_strategy_two(numiterations, Q, len(actions), s)
       action = actions[a]
+
 
       s_prime = s - throw.location_to_score(action)
       if s_prime < 0:
         s_prime = s
+
       maxQ = 0.0
       for a_prime in range(len(actions)):
         if Q[s_prime][a_prime] > maxQ:
